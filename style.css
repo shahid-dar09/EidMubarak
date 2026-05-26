@@ -288,6 +288,7 @@ body.light-mode #navbar.scrolled {
   box-shadow: inset -28px -12px 0 0 var(--gold-light);
   filter: drop-shadow(0 0 30px rgba(240, 201, 110, 0.7))
     drop-shadow(0 0 60px rgba(240, 201, 110, 0.3));
+  transition: transform 1.6s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 @media (max-width: 640px) {

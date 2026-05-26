@@ -231,24 +231,26 @@ if (hamburger && navLinks) {
     ctx.stroke();
   }
 
-  // Global hook to spawn Mandala fireworks explosions
+  // Global hook to spawn Mandala fireworks explosions (Optimized for 60FPS mobile performance)
   window.spawnMandalaExplosion = function(x, y) {
-    const colors = ['#d4a843', '#f0c96e', '#10b981', '#27a865', '#ffffff', '#a07830'];
-    const count = Math.random() > 0.5 ? 4 : 5;
-    for (let i = 0; i < count; i++) {
-      mandalas.push({
-        x: x || Math.random() * W,
-        y: y || Math.random() * (H * 0.55) + H * 0.1, // upper portion of screen
-        r: 6,
-        vr: Math.random() * 1.6 + 1.2,
-        rotation: Math.random() * Math.PI * 2,
-        vRotation: (Math.random() - 0.5) * 0.015 + 0.008,
-        alpha: 1.0,
-        decay: Math.random() * 0.012 + 0.006,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        lineWidth: Math.random() * 0.8 + 1.0
-      });
+    // Keep a strict cap on active mandalas to prevent GPU choking
+    if (mandalas.length >= 8) {
+      mandalas.shift(); // Remove the oldest one to conserve memory
     }
+
+    const colors = ['#d4a843', '#f0c96e', '#10b981', '#27a865', '#ffffff', '#a07830'];
+    mandalas.push({
+      x: x || Math.random() * W,
+      y: y || Math.random() * (H * 0.45) + H * 0.15, // centered nicely in the upper sky
+      r: 6,
+      vr: Math.random() * 1.4 + 1.4, // slightly slower radial expansion for smooth clarity
+      rotation: Math.random() * Math.PI * 2,
+      vRotation: (Math.random() - 0.5) * 0.012 + 0.006,
+      alpha: 1.0,
+      decay: Math.random() * 0.010 + 0.006, // lingers beautifully
+      color: colors[Math.floor(Math.random() * colors.length)],
+      lineWidth: Math.random() * 0.6 + 1.1
+    });
   };
 
   // Create stars
@@ -374,26 +376,17 @@ if (hamburger && navLinks) {
       ctx.arc(0, 0, m.r, 0, Math.PI * 2);
       ctx.stroke();
       
-      // Layer 2: 8-pointed star
-      drawIslamicStar(ctx, 0, 0, m.r, 8);
+      // Layer 2: Main 8-pointed Islamic star
+      drawIslamicStar(ctx, 0, 0, m.r * 0.8, 8);
       
-      // Layer 3: Nested smaller star rotated
-      ctx.save();
-      ctx.rotate(Math.PI / 8);
-      drawIslamicStar(ctx, 0, 0, m.r * 0.72, 8);
-      ctx.restore();
-      
-      // Layer 4: Concentric middle circle
+      // Layer 3: Concentric inner circle
       ctx.beginPath();
-      ctx.arc(0, 0, m.r * 0.4, 0, Math.PI * 2);
+      ctx.arc(0, 0, m.r * 0.42, 0, Math.PI * 2);
       ctx.stroke();
       
-      // Layer 5: Inner 12-pointed star
-      drawIslamicStar(ctx, 0, 0, m.r * 0.25, 12);
-      
-      // Layer 6: Center filled core
+      // Layer 4: Center filled core
       ctx.beginPath();
-      ctx.arc(0, 0, m.r * 0.08, 0, Math.PI * 2);
+      ctx.arc(0, 0, m.r * 0.12, 0, Math.PI * 2);
       ctx.fillStyle = m.color;
       ctx.fill();
       
@@ -730,11 +723,11 @@ window.triggerCelebration = function() {
     });
   }, 600);
 
-  // Moon-glow pulse
+  // Moon pulse (Optimized scale transition to avoid heavy CPU-bound CSS filter drop-shadow repaints)
   const moon = document.querySelector('.moon');
   if (moon) {
-    moon.style.filter = 'drop-shadow(0 0 60px rgba(240,201,110,1)) drop-shadow(0 0 120px rgba(240,201,110,0.6))';
-    setTimeout(() => { moon.style.filter = ''; }, 2000);
+    moon.style.transform = 'scale(1.15)';
+    setTimeout(() => { moon.style.transform = ''; }, 1600);
   }
 
   showToast('🎉 Eid Mubarak! Celebrating with joy! 🌙');
