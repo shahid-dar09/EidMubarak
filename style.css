@@ -1733,3 +1733,12 @@ footer {
     0 0 35px rgba(212, 168, 67, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
 }
+
+/* Theme Selector Label */
+.theme-selector-label {
+  color: rgba(232, 244, 248, 0.6);
+  letter-spacing: 2px !important;
+}
+body.light-mode .theme-selector-label {
+  color: rgba(26, 32, 44, 0.6);
+}
