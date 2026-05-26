@@ -333,7 +333,9 @@ window.downloadWish = function() {
 // Share on WhatsApp
 window.shareWA = function() {
   const msg = document.getElementById('wish-message');
-  const text = encodeURIComponent(msg ? msg.textContent : 'Eid Mubarak! 🌙 May Allah bless you!');
+  const baseText = msg ? msg.textContent : 'Eid Mubarak! 🌙 May Allah bless you!';
+  const fullText = `${baseText}\n\n✨ Create your own custom Eid wish card here:\n👉 ${window.location.href}`;
+  const text = encodeURIComponent(fullText);
   window.open(`https://wa.me/?text=${text}`, '_blank');
 };
 
