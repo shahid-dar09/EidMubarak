@@ -266,6 +266,15 @@ const WISHES = [
   "🌟 With love from {name} — May this Eid be a turning point, a new beginning, and a beautiful chapter in your blessed life.",
   "🎉 {name} says: Eid Mubarak! May every dua you make reach the heavens and every blessing return to you a thousandfold.",
   "🌸 Warm Eid wishes from {name} — May you be surrounded by love, wrapped in happiness, and guided always by His light.",
+  "🕌 Heartfelt Eid greetings from {name} — May your home be filled with the sweet melodies of laughter, your heart with deep contentment, and your life with Allah's endless grace.",
+  "🌙 {name} wishes you a magical Eid! May this holy celebration bring you peace that surpasses understanding and success in all your righteous steps.",
+  "✨ From {name} to your beautiful family — May the blessings of this Eid illuminate every corner of your life and guide you to ultimate happiness.",
+  "🌟 On this glorious day, {name} sends you prayers of gratitude — May Allah accept your sacrifices, fulfill your deepest duas, and surround you with blessings.",
+  "🌺 Eid Mubarak from {name}! May the blessings of Allah be the soft breeze that guides your sails towards peace, health, and prosperity.",
+  "💛 Sending a basket of blessings from {name} — May this Eid al-Adha bring you closer to the ones you cherish and wrap you in divine safety and joy.",
+  "🎉 Double the joy, double the blessings! {name} wishes you a spectacular Eid filled with sweet treats, warm hugs, and beautiful moments.",
+  "🌸 As the crescent moon glows, {name} prays for your peace — May you find comfort in your faith, strength in your heart, and boundless love in your life.",
+  "🕌 {name} says: Eid Mubarak! May this auspicious day usher in a lifetime of positive changes, true friendships, and spiritual heights."
 ];
 
 function generateWish() {
