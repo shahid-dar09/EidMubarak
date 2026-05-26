@@ -22,6 +22,23 @@ window.addEventListener('load', () => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const nameParam = urlParams.get('name');
+      const themeParam = urlParams.get('theme');
+
+      if (themeParam) {
+        setCardTheme(themeParam);
+        // Apply theme to the Hero Section background!
+        const heroSection = document.getElementById('hero');
+        if (heroSection) {
+          if (themeParam === 'royal') {
+            heroSection.style.background = 'linear-gradient(180deg, #060d1f 0%, #0a1628 50%, #1a2a4a 100%)';
+          } else if (themeParam === 'ruby') {
+            heroSection.style.background = 'linear-gradient(180deg, #060d1f 0%, #30060d 50%, #5c0d1e 100%)';
+          } else if (themeParam === 'emerald') {
+            heroSection.style.background = 'linear-gradient(180deg, #060d1f 0%, #0a1628 50%, #0d1f0f 100%)';
+          }
+        }
+      }
+
       if (nameParam) {
         const cleanName = decodeURIComponent(nameParam).trim();
         if (cleanName) {
@@ -37,7 +54,7 @@ window.addEventListener('load', () => {
         }
       }
     } catch (e) {
-      console.log('Error parsing url name:', e);
+      console.log('Error parsing url name/theme:', e);
     }
   }, 1800);
 });
@@ -145,11 +162,15 @@ if (hamburger && navLinks) {
 /* ============================================================
    5. STAR / PARTICLE CANVAS (OPTIMIZED 60FPS)
    ============================================================ */
+/* ============================================================
+   5. STAR / PARTICLE CANVAS (OPTIMIZED 60FPS WITH STARLIGHT TRAIL)
+   ============================================================ */
 (function initStars() {
   const canvas = document.getElementById('star-canvas');
   if (!canvas) return;
   const ctx    = canvas.getContext('2d');
   let W, H, stars = [], particles = [];
+  let mouseSparkles = [];
 
   function resize() {
     W = canvas.width  = canvas.offsetWidth;
@@ -157,6 +178,37 @@ if (hamburger && navLinks) {
   }
   resize();
   window.addEventListener('resize', resize);
+
+  // Sparkle generator for mouse and touch interactions
+  function spawnSparkle(clientX, clientY) {
+    const rect = canvas.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    
+    // Create sparkles
+    for (let i = 0; i < 2; i++) {
+      mouseSparkles.push({
+        x: x,
+        y: y,
+        r: Math.random() * 1.6 + 0.8,
+        vx: (Math.random() - 0.5) * 2.2,
+        vy: (Math.random() - 0.5) * 2.2 - 0.5,
+        alpha: 1.0,
+        decay: Math.random() * 0.035 + 0.015,
+        color: Math.random() > 0.5 ? '#d4a843' : '#e8f4f8'
+      });
+    }
+  }
+
+  window.addEventListener('mousemove', e => {
+    spawnSparkle(e.clientX, e.clientY);
+  }, { passive: true });
+
+  window.addEventListener('touchmove', e => {
+    if (e.touches && e.touches[0]) {
+      spawnSparkle(e.touches[0].clientX, e.touches[0].clientY);
+    }
+  }, { passive: true });
 
   // Create stars
   for (let i = 0; i < 220; i++) {
@@ -226,6 +278,37 @@ if (hamburger && navLinks) {
       ctx.arc(p.x % W, p.y, p.r, 0, Math.PI * 2);
       ctx.fill();
     });
+
+    // Draw interactive sparkles (diamond sparkles)
+    for (let i = mouseSparkles.length - 1; i >= 0; i--) {
+      const s = mouseSparkles[i];
+      s.x += s.vx;
+      s.y += s.vy;
+      s.alpha -= s.decay;
+      if (s.alpha <= 0) {
+        mouseSparkles.splice(i, 1);
+        continue;
+      }
+      
+      ctx.globalAlpha = s.alpha;
+      ctx.fillStyle = s.color;
+      ctx.beginPath();
+      
+      // Diamond Spark shape drawing
+      const cx = s.x;
+      const cy = s.y;
+      const r = s.r * 2.8;
+      ctx.moveTo(cx, cy - r);
+      ctx.lineTo(cx + r/3, cy - r/3);
+      ctx.lineTo(cx + r, cy);
+      ctx.lineTo(cx + r/3, cy + r/3);
+      ctx.lineTo(cx, cy + r);
+      ctx.lineTo(cx - r/3, cy + r/3);
+      ctx.lineTo(cx - r, cy);
+      ctx.lineTo(cx - r/3, cy - r/3);
+      ctx.closePath();
+      ctx.fill();
+    }
 
     ctx.globalAlpha = 1.0; // Reset global alpha
     requestAnimationFrame(draw);
@@ -299,6 +382,27 @@ const WISHES = [
   "🕌 {name} says: Eid Mubarak! May this auspicious day usher in a lifetime of positive changes, true friendships, and spiritual heights."
 ];
 
+let currentTheme = 'emerald';
+
+window.setCardTheme = function(theme) {
+  currentTheme = theme;
+  
+  // Update theme buttons state in UI
+  document.querySelectorAll('.theme-select-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  const activeBtn = document.querySelector(`.${theme}-theme-btn`);
+  if (activeBtn) activeBtn.classList.add('active');
+  
+  // Apply theme styling to the wish result card
+  const card = document.getElementById('wish-result');
+  if (card) {
+    const isVisible = card.classList.contains('visible');
+    card.className = `glass-card wish-result-card card-theme--${theme}`;
+    if (isVisible) card.classList.add('visible');
+  }
+};
+
 function generateWish() {
   const nameEl  = document.getElementById('wish-name');
   const cardEl  = document.getElementById('wish-result');
@@ -336,10 +440,13 @@ window.shareWish = function() {
   const name = nameEl ? nameEl.value.trim() : '';
   const baseText = msg.textContent;
   
-  // Construct the custom surprise URL
+  // Construct the custom surprise URL with name and active theme parameters
   let siteUrl = window.location.origin + window.location.pathname;
-  if (name) {
-    siteUrl += `?name=${encodeURIComponent(name)}`;
+  let queryParts = [];
+  if (name) queryParts.push(`name=${encodeURIComponent(name)}`);
+  if (currentTheme !== 'emerald') queryParts.push(`theme=${currentTheme}`);
+  if (queryParts.length > 0) {
+    siteUrl += `?${queryParts.join('&')}`;
   }
   
   let shareText = name 
@@ -388,10 +495,13 @@ window.shareWA = function() {
   const name = nameEl ? nameEl.value.trim() : '';
   const baseText = msg ? msg.textContent : 'Eid Mubarak! 🌙 May Allah bless you!';
   
-  // Construct the custom surprise URL
+  // Construct the custom surprise URL with name and active theme parameters
   let siteUrl = window.location.origin + window.location.pathname;
-  if (name) {
-    siteUrl += `?name=${encodeURIComponent(name)}`;
+  let queryParts = [];
+  if (name) queryParts.push(`name=${encodeURIComponent(name)}`);
+  if (currentTheme !== 'emerald') queryParts.push(`theme=${currentTheme}`);
+  if (queryParts.length > 0) {
+    siteUrl += `?${queryParts.join('&')}`;
   }
   
   // Custom viral WhatsApp prefilled text!
