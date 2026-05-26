@@ -940,6 +940,36 @@ body.light-mode .quote-text {
     0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
+#music-toggle.playing::before,
+#music-toggle.playing::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 50%;
+  border: 1.5px solid var(--glow-green);
+  opacity: 0;
+  animation: rippleRing 2.4s cubic-bezier(0.1, 0.8, 0.3, 1) infinite;
+  pointer-events: none;
+}
+
+#music-toggle.playing::after {
+  animation-delay: 1.2s;
+}
+
+@keyframes rippleRing {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(1.65);
+    opacity: 0;
+  }
+}
+
 @keyframes musicPulse {
   0%,
   100% {

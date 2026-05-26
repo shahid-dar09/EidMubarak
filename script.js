@@ -163,7 +163,7 @@ if (hamburger && navLinks) {
    5. STAR / PARTICLE CANVAS (OPTIMIZED 60FPS)
    ============================================================ */
 /* ============================================================
-   5. STAR / PARTICLE CANVAS (OPTIMIZED 60FPS WITH STARLIGHT TRAIL)
+   5. STAR / PARTICLE CANVAS (OPTIMIZED 60FPS WITH STARLIGHT TRAIL & MANDALAS)
    ============================================================ */
 (function initStars() {
   const canvas = document.getElementById('star-canvas');
@@ -171,6 +171,7 @@ if (hamburger && navLinks) {
   const ctx    = canvas.getContext('2d');
   let W, H, stars = [], particles = [];
   let mouseSparkles = [];
+  let mandalas = [];
 
   function resize() {
     W = canvas.width  = canvas.offsetWidth;
@@ -198,6 +199,11 @@ if (hamburger && navLinks) {
         color: Math.random() > 0.5 ? '#d4a843' : '#e8f4f8'
       });
     }
+
+    // Sparkle sound chime!
+    if (window.playSparkleChime) {
+      window.playSparkleChime(clientX, clientY);
+    }
   }
 
   window.addEventListener('mousemove', e => {
@@ -209,6 +215,41 @@ if (hamburger && navLinks) {
       spawnSparkle(e.touches[0].clientX, e.touches[0].clientY);
     }
   }, { passive: true });
+
+  // Islamic Geometric Star drawing helper
+  function drawIslamicStar(ctx, cx, cy, r, points = 8) {
+    ctx.beginPath();
+    for (let i = 0; i < points * 2; i++) {
+      const angle = (i * Math.PI) / points;
+      const dist = i % 2 === 0 ? r : r * 0.45;
+      const x = cx + Math.cos(angle) * dist;
+      const y = cy + Math.sin(angle) * dist;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.stroke();
+  }
+
+  // Global hook to spawn Mandala fireworks explosions
+  window.spawnMandalaExplosion = function(x, y) {
+    const colors = ['#d4a843', '#f0c96e', '#10b981', '#27a865', '#ffffff', '#a07830'];
+    const count = Math.random() > 0.5 ? 4 : 5;
+    for (let i = 0; i < count; i++) {
+      mandalas.push({
+        x: x || Math.random() * W,
+        y: y || Math.random() * (H * 0.55) + H * 0.1, // upper portion of screen
+        r: 6,
+        vr: Math.random() * 1.6 + 1.2,
+        rotation: Math.random() * Math.PI * 2,
+        vRotation: (Math.random() - 0.5) * 0.015 + 0.008,
+        alpha: 1.0,
+        decay: Math.random() * 0.012 + 0.006,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        lineWidth: Math.random() * 0.8 + 1.0
+      });
+    }
+  };
 
   // Create stars
   for (let i = 0; i < 220; i++) {
@@ -308,6 +349,55 @@ if (hamburger && navLinks) {
       ctx.lineTo(cx - r/3, cy - r/3);
       ctx.closePath();
       ctx.fill();
+    }
+
+    // Draw mandalas (Islamic Geometric Fireworks)
+    for (let i = mandalas.length - 1; i >= 0; i--) {
+      const m = mandalas[i];
+      m.r += m.vr;
+      m.rotation += m.vRotation;
+      m.alpha -= m.decay;
+      if (m.alpha <= 0) {
+        mandalas.splice(i, 1);
+        continue;
+      }
+      
+      ctx.save();
+      ctx.translate(m.x, m.y);
+      ctx.rotate(m.rotation);
+      ctx.globalAlpha = m.alpha;
+      ctx.strokeStyle = m.color;
+      ctx.lineWidth = m.lineWidth;
+      
+      // Layer 1: Outer circle
+      ctx.beginPath();
+      ctx.arc(0, 0, m.r, 0, Math.PI * 2);
+      ctx.stroke();
+      
+      // Layer 2: 8-pointed star
+      drawIslamicStar(ctx, 0, 0, m.r, 8);
+      
+      // Layer 3: Nested smaller star rotated
+      ctx.save();
+      ctx.rotate(Math.PI / 8);
+      drawIslamicStar(ctx, 0, 0, m.r * 0.72, 8);
+      ctx.restore();
+      
+      // Layer 4: Concentric middle circle
+      ctx.beginPath();
+      ctx.arc(0, 0, m.r * 0.4, 0, Math.PI * 2);
+      ctx.stroke();
+      
+      // Layer 5: Inner 12-pointed star
+      drawIslamicStar(ctx, 0, 0, m.r * 0.25, 12);
+      
+      // Layer 6: Center filled core
+      ctx.beginPath();
+      ctx.arc(0, 0, m.r * 0.08, 0, Math.PI * 2);
+      ctx.fillStyle = m.color;
+      ctx.fill();
+      
+      ctx.restore();
     }
 
     ctx.globalAlpha = 1.0; // Reset global alpha
@@ -584,15 +674,41 @@ window.shareWA = function() {
 })();
 
 /* ============================================================
-   10. CONFETTI / FIREWORKS (canvas-confetti)
+   10. CONFETTI / FIREWORKS (canvas-confetti & GEOMETRIC MANDALAS)
    ============================================================ */
 window.triggerCelebration = function() {
+  const colors = ['#d4a843', '#f0c96e', '#10b981', '#27a865', '#ffffff', '#a07830'];
+
+  // Spawn mathematical Islamic Geometric Mandala fireworks explosions dynamically
+  if (window.spawnMandalaExplosion) {
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+    
+    // Immediate left/right explosions
+    window.spawnMandalaExplosion(W * 0.25, H * 0.35);
+    window.spawnMandalaExplosion(W * 0.75, H * 0.35);
+
+    // Delayed center peak explosion
+    setTimeout(() => {
+      window.spawnMandalaExplosion(W * 0.5, H * 0.22);
+    }, 250);
+
+    // Secondary delayed ambient bursts
+    setTimeout(() => {
+      window.spawnMandalaExplosion(W * 0.35, H * 0.45);
+      window.spawnMandalaExplosion(W * 0.65, H * 0.45);
+    }, 500);
+
+    // Final grand finale burst
+    setTimeout(() => {
+      window.spawnMandalaExplosion(W * 0.5, H * 0.38);
+    }, 750);
+  }
+
   if (typeof confetti === 'undefined') {
     showToast('🎉 Eid Mubarak! 🌙');
     return;
   }
-
-  const colors = ['#d4a843', '#f0c96e', '#10b981', '#27a865', '#ffffff', '#a07830'];
 
   // Burst from left
   confetti({ particleCount: 80, angle: 60, spread: 70, origin: { x: 0, y: 0.6 }, colors });
@@ -649,47 +765,187 @@ window.triggerCelebration = function() {
 })();
 
 /* ============================================================
-   12. MUSIC TOGGLE
+   12. MUSIC TOGGLE (PREMIUM ETHEREAL HIJAZ SYNTHESIZER & SPARKLING CHIMES)
    ============================================================ */
 (function initMusic() {
   const btn = document.getElementById('music-toggle');
   if (!btn) return;
   let playing = false;
 
-  // We'll use the Web Audio API to generate a simple ambient tone
-  let audioCtx = null, gainNode = null, oscillator = null;
+  let audioCtx = null;
+  let masterGain = null;
+  let filterNode = null;
+  let droneOsc = null;
+  let droneGain = null;
+  let arpeggioTimer = null;
+
+  // C Hijaz chords progression
+  const chords = [
+    [130.81, 196.00, 277.18, 329.63, 392.00], // C Hijaz (C3, G3, Db4, E4, G4)
+    [130.81, 207.65, 277.18, 349.23, 415.30], // Fm/C (C3, Ab3, Db4, F4, Ab4)
+    [138.59, 207.65, 277.18, 349.23, 415.30], // Db Major (Db3, Ab3, Db4, F4, Ab4)
+    [130.81, 196.00, 277.18, 329.63, 392.00]  // C Hijaz
+  ];
+
+  // High-pitch shimmering wind chime scale in Hijaz mode
+  const chimeScale = [
+    523.25, // C5
+    554.37, // Db5
+    659.25, // E5
+    698.46, // F5
+    783.99, // G5
+    830.61, // Ab5
+    987.77, // B5
+    1046.50, // C6
+    1108.73, // Db6
+    1318.51, // E6
+    1396.91, // F6
+    1567.98  // G6
+  ];
+  let lastChimeTime = 0;
 
   function startAmbient() {
     try {
-      audioCtx  = new (window.AudioContext || window.webkitAudioContext)();
-      gainNode  = audioCtx.createGain();
-      gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.03, audioCtx.currentTime + 2);
-      gainNode.connect(audioCtx.destination);
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      
+      // Master output gain
+      masterGain = audioCtx.createGain();
+      masterGain.gain.setValueAtTime(0, audioCtx.currentTime);
+      masterGain.gain.linearRampToValueAtTime(1.0, audioCtx.currentTime + 1.5);
+      masterGain.connect(audioCtx.destination);
 
-      // Create layered soft tones (C major arpeggio simulation)
-      const freqs = [261.63, 329.63, 392.00, 523.25];
-      freqs.forEach((freq, i) => {
-        const osc  = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine';
+      // Low-pass filter for warm background drone aesthetics
+      filterNode = audioCtx.createBiquadFilter();
+      filterNode.type = 'lowpass';
+      filterNode.frequency.setValueAtTime(650, audioCtx.currentTime);
+      filterNode.connect(masterGain);
+
+      // Warm continuous drone base frequency (C2 = 65.41 Hz)
+      droneOsc = audioCtx.createOscillator();
+      droneGain = audioCtx.createGain();
+      droneOsc.type = 'sine';
+      droneOsc.frequency.setValueAtTime(65.41, audioCtx.currentTime);
+      droneGain.gain.setValueAtTime(0, audioCtx.currentTime);
+      droneGain.gain.linearRampToValueAtTime(0.018, audioCtx.currentTime + 3.0);
+      
+      droneOsc.connect(droneGain);
+      droneGain.connect(filterNode);
+      droneOsc.start();
+
+      // Begin scheduling the rolling, breathing Hijaz pad chord arpeggiations
+      let currentChordIndex = 0;
+      let currentNoteIndex = 0;
+
+      function scheduleNextNote() {
+        if (!audioCtx || audioCtx.state === 'suspended') return;
+        const chord = chords[currentChordIndex];
+        const freq = chord[currentNoteIndex];
+
+        const osc = audioCtx.createOscillator();
+        const noteGain = audioCtx.createGain();
+
+        // Alternates between warm sine waves and glassy triangle wave overtones
+        osc.type = Math.random() > 0.45 ? 'sine' : 'triangle';
         osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
-        osc.connect(gain);
-        gain.connect(gainNode);
-        osc.start(audioCtx.currentTime + i * 0.5);
-      });
-    } catch(e) {
-      console.log('Audio not supported:', e);
+
+        osc.connect(noteGain);
+        noteGain.connect(filterNode);
+
+        const now = audioCtx.currentTime;
+        noteGain.gain.setValueAtTime(0, now);
+        // Soft blooming attack envelope
+        noteGain.gain.linearRampToValueAtTime(0.012, now + 1.2);
+        // Beautiful, slow, lingering arpeggio decay
+        noteGain.gain.exponentialRampToValueAtTime(0.0001, now + 4.5);
+
+        osc.start(now);
+        osc.stop(now + 4.7);
+
+        // Progress to next note
+        currentNoteIndex = (currentNoteIndex + 1) % chord.length;
+        if (currentNoteIndex === 0) {
+          // Switch chord progression at the end of each arpeggiator cycle
+          currentChordIndex = (currentChordIndex + 1) % chords.length;
+        }
+
+        arpeggioTimer = setTimeout(scheduleNextNote, 1000);
+      }
+
+      scheduleNextNote();
+    } catch (e) {
+      console.log('Ethereal Audio Engine start error:', e);
     }
   }
 
   function stopAmbient() {
     if (audioCtx) {
-      gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1);
-      setTimeout(() => { audioCtx.close(); audioCtx = null; }, 1100);
+      if (arpeggioTimer) {
+        clearTimeout(arpeggioTimer);
+        arpeggioTimer = null;
+      }
+      
+      if (masterGain) {
+        masterGain.gain.setValueAtTime(masterGain.gain.value, audioCtx.currentTime);
+        masterGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.8);
+      }
+      
+      setTimeout(() => {
+        if (audioCtx) {
+          try {
+            audioCtx.close();
+          } catch(e) {}
+          audioCtx = null;
+          masterGain = null;
+          filterNode = null;
+          droneOsc = null;
+          droneGain = null;
+        }
+      }, 900);
     }
   }
+
+  // Globally wire cursor/touch diamond sparkles to play musical chime notes
+  window.playSparkleChime = function(clientX, clientY) {
+    if (!audioCtx || audioCtx.state === 'suspended' || !masterGain) return;
+    
+    // Throttle chime audio nodes (max 1 every 80ms) to ensure smooth performance
+    const nowMs = Date.now();
+    if (nowMs - lastChimeTime < 80) return;
+    lastChimeTime = nowMs;
+
+    const ratio = Math.max(0, Math.min(0.999, clientX / window.innerWidth));
+    const noteIndex = Math.floor(ratio * chimeScale.length);
+    const freq = chimeScale[noteIndex];
+    const now = audioCtx.currentTime;
+
+    try {
+      const osc1 = audioCtx.createOscillator();
+      const osc2 = audioCtx.createOscillator();
+      const chimeGain = audioCtx.createGain();
+
+      osc1.type = 'triangle';
+      osc1.frequency.setValueAtTime(freq, now);
+
+      // Shimmering crystalline harmonic overtone detuned slightly for acoustic organic feeling
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(freq * 2.015, now);
+
+      chimeGain.gain.setValueAtTime(0, now);
+      chimeGain.gain.linearRampToValueAtTime(0.016, now + 0.008);
+      chimeGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
+
+      osc1.connect(chimeGain);
+      osc2.connect(chimeGain);
+      chimeGain.connect(masterGain);
+
+      osc1.start(now);
+      osc2.start(now);
+      osc1.stop(now + 1.3);
+      osc2.stop(now + 1.3);
+    } catch(e) {
+      console.log('Error triggering chime synth:', e);
+    }
+  };
 
   btn.addEventListener('click', () => {
     playing = !playing;
