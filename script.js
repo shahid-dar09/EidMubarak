@@ -17,6 +17,28 @@ window.addEventListener('load', () => {
     initScrollAnimations();
     startTyping();
     rotateBlessings();
+
+    // Check for personalized query name (WhatsApp Viral surprise style)
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const nameParam = urlParams.get('name');
+      if (nameParam) {
+        const cleanName = decodeURIComponent(nameParam).trim();
+        if (cleanName) {
+          const greetingBadge = document.getElementById('personalized-greeting');
+          const greetingName  = document.getElementById('personalized-name');
+          if (greetingBadge && greetingName) {
+            greetingName.textContent = cleanName.toUpperCase();
+            greetingBadge.classList.remove('hidden');
+          }
+          // Prefill name input so they can reply or create their own card easily!
+          const nameInput = document.getElementById('wish-name');
+          if (nameInput) nameInput.value = cleanName;
+        }
+      }
+    } catch (e) {
+      console.log('Error parsing url name:', e);
+    }
   }, 1800);
 });
 
@@ -307,15 +329,34 @@ window.copyWish = function() {
 
 // Share wish
 window.shareWish = function() {
+  const nameEl  = document.getElementById('wish-name');
   const msg = document.getElementById('wish-message');
   if (!msg) return;
-  const text = msg.textContent;
+  
+  const name = nameEl ? nameEl.value.trim() : '';
+  const baseText = msg.textContent;
+  
+  // Construct the custom surprise URL
+  let siteUrl = window.location.origin + window.location.pathname;
+  if (name) {
+    siteUrl += `?name=${encodeURIComponent(name)}`;
+  }
+  
+  let shareText = name 
+    ? `✨ *${name}* has sent you a special Eid Mubarak surprise surprise! 🌙 Click the link below to open your surprise card:\n👉 ${siteUrl}\n\n`
+    : `Create your own custom Eid wish surprise surprise here:\n👉 ${siteUrl}\n\n`;
+    
+  const fullMessage = shareText + `"${baseText}"`;
+    
   if (navigator.share) {
-    navigator.share({ title: 'Eid Mubarak 🌙', text, url: window.location.href })
-      .catch(() => {});
+    navigator.share({ 
+      title: 'Eid Mubarak Surprise 🌙', 
+      text: fullMessage, 
+      url: siteUrl 
+    }).catch(() => {});
   } else {
-    navigator.clipboard.writeText(text);
-    showToast('📋 Message copied — share it anywhere!');
+    navigator.clipboard.writeText(fullMessage);
+    showToast('📋 Surprise link & wish copied — share it anywhere!');
   }
 };
 
@@ -341,10 +382,31 @@ window.downloadWish = function() {
 
 // Share on WhatsApp
 window.shareWA = function() {
+  const nameEl  = document.getElementById('wish-name');
   const msg = document.getElementById('wish-message');
+  
+  const name = nameEl ? nameEl.value.trim() : '';
   const baseText = msg ? msg.textContent : 'Eid Mubarak! 🌙 May Allah bless you!';
-  const fullText = `${baseText}\n\n✨ Create your own custom Eid wish card here:\n👉 ${window.location.href}`;
-  const text = encodeURIComponent(fullText);
+  
+  // Construct the custom surprise URL
+  let siteUrl = window.location.origin + window.location.pathname;
+  if (name) {
+    siteUrl += `?name=${encodeURIComponent(name)}`;
+  }
+  
+  // Custom viral WhatsApp prefilled text!
+  let viralText = "";
+  if (name) {
+    viralText = `*${name}* has sent you a special Eid Mubarak surprise surprise! 🌙✨\n\n` +
+                `👇 Click the blue link below to see your personalized blessing:\n` +
+                `👉 ${siteUrl}\n\n` +
+                `---\n` +
+                `"${baseText}"`;
+  } else {
+    viralText = `${baseText}\n\n✨ Create your own custom Eid surprise wish here:\n👉 ${siteUrl}`;
+  }
+  
+  const text = encodeURIComponent(viralText);
   window.open(`https://wa.me/?text=${text}`, '_blank');
 };
 

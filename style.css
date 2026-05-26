@@ -1634,3 +1634,41 @@ footer {
   font-family: serif;
   letter-spacing: 2px;
 }
+
+/* ---- Personalized Greeting Badge (WhatsApp Viral) ---- */
+.personalized-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.2rem;
+  background: rgba(212, 168, 67, 0.08);
+  border: 1px dashed var(--gold);
+  border-radius: 50px;
+  color: var(--gold-light);
+  font-family: "Cinzel", serif;
+  font-size: clamp(0.75rem, 2.5vw, 0.95rem);
+  letter-spacing: 2px;
+  margin-bottom: 2rem;
+  box-shadow: 
+    0 0 15px rgba(212, 168, 67, 0.1),
+    inset 0 0 10px rgba(212, 168, 67, 0.05);
+  animation: badgeGlow 2.5s ease-in-out infinite;
+  will-change: transform, box-shadow;
+}
+
+@keyframes badgeGlow {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 15px rgba(212, 168, 67, 0.1);
+  }
+  50% {
+    transform: scale(1.03);
+    box-shadow: 0 0 25px rgba(212, 168, 67, 0.25);
+  }
+}
+
+.personalized-badge span#personalized-name {
+  font-weight: 700;
+  color: var(--white);
+  text-shadow: 0 0 10px var(--glow-gold);
+}
